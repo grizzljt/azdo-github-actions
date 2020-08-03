@@ -1,3 +1,8 @@
+variable "subscription_id" { type = string }
+variable "client_secret" { type = string }
+variable "client_id" { type = string }
+variable "tenant_id" { type = string }
+
 variable "environment" {
   description = "The environment to which the Terraform configuration will be deployed"
   default     = "dev"
