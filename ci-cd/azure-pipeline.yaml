@@ -1,0 +1,171 @@
+stages:
+  - stage: demo_plan
+    displayName: 'Demo Plan'
+    
+    jobs:
+
+    - job: terraform_plan
+      pool:
+        name: Azure Pipelines
+        vmImage: ubuntu-18.04
+      steps:
+      - bash: git config --global url."https://pat:$SYSTEM_ACCESSTOKEN@kroger-rd.visualstudio.com".insteadOf https://kroger-rd.visualstudio.com
+        workingDirectory: ${{ parameters.workingDirectory }}  
+        displayName: Inject PAT token for Git
+        env:
+          SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+      - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
+        displayName: 'Install Terraform'
+        inputs:
+          terraformVersion: ${{ parameters.terraformVersion }}
+      - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV1@0
+        displayName: 'Terraform init'
+        inputs:
+          workingDirectory: ${{ parameters.workingDirectory }}
+          provider: azurerm
+          command: init
+          backendServiceArm: ${{ parameters.azureSubscription }}
+          backendAzureRmResourceGroupName: ${{ parameters.backendResourceGroup }}
+          backendAzureRmStorageAccountName: ${{ parameters.backendStorageAccount }}
+          backendAzureRmContainerName: ${{ parameters.backendContainer }}
+          backendAzureRmKey: ${{ parameters.backendKey }}
+          commandOptions: '-input=false'
+      - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV1@0
+        displayName: 'Terraform plan'
+        inputs:
+          workingDirectory: ${{ parameters.workingDirectory }}
+          provider: azurerm
+          command: plan
+          commandOptions: '-out tfplan -input=false  ${{ parameters.planOptions }}'
+          environmentServiceNameAzureRM: ${{ parameters.azureSubscription }}
+        env:
+          ${{ each var in parameters.vars }}: 
+            TF_VAR_${{var.key}}: ${{var.value}}
+      - task: ArchiveFiles@2
+        displayName: 'Archive Terraform Working Directory'
+        inputs: 
+          rootFolderOrFile: ${{ parameters.workingDirectory }}
+          archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId)_${{ parameters.name }}.zip
+          includeRootFolder: false
+      - task: AzureCLI@1
+        displayName: 'Upload Terraform Working Directory'
+        inputs:
+          azureSubscription: ${{ parameters.azureSubscription }}
+          scriptLocation: 'inlinescript'
+          inlineScript: 'az storage blob upload -f $(Build.ArtifactStagingDirectory)/$(Build.BuildId)_${{ parameters.name }}.zip -c tfplan -n ${{ parameters.backendKey }}-$(Build.BuildId) --account-name=${{ parameters.backendStorageAccount }}'
+          workingDirectory: ${{ parameters.workingDirectory }}
+      - task: AzureCLI@1
+        displayName: 'Break Lease on Terraform State'
+        condition: canceled()
+        inputs:
+          azureSubscription: ${{ parameters.azureSubscription }}
+          scriptLocation: inlineScript
+          inlineScript: 'az storage blob lease break --blob-name ${{ parameters.backendKey }} --container-name ${{ parameters.backendContainer }} --account-name ${{ parameters.backendStorageAccount }} || true'
+      - bash: git config --global --unset url."https://pat:$SYSTEM_ACCESSTOKEN@kroger-rd.visualstudio.com".insteadOf https://kroger-rd.visualstudio.com
+        displayName: Remove PAT token for Git
+        condition: always()
+        env:
+          SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+    
+    # - job: terraform_plan
+    #   displayName: terraform Plan
+    #   steps:
+
+    #   - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV1@0
+    #     displayName: 'Terraform Init'
+    #     inputs:
+    #       workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+    #       backendServiceArm: 'Visual Studio Enterprise (acd2e298-d61f-4ed2-8b28-dc2f60d9f382)'
+    #       backendAzureRmResourceGroupName: 'Terraform-state'
+    #       backendAzureRmStorageAccountName: grizzletffiles
+    #       backendAzureRmContainerName: tfstate
+    #       backendAzureRmKey: terraform.tfstate
+
+    #   - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV1@0
+    #     displayName: 'Terraform plan'
+    #     inputs:
+    #       command: plan
+    #       environmentServiceNameAzureRM: 'Visual Studio Enterprise (acd2e298-d61f-4ed2-8b28-dc2f60d9f382)'
+
+  - stage: demo_apply
+    displayName: 'Demo Apply'
+
+    jobs:
+      
+    - deployment: terraform_apply
+      environment: ${{ parameters.environment }}
+      pool:
+        name: Azure Pipelines
+        vmImage: ubuntu-18.04
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+            - checkout: self
+              clean: true
+              persistCredentials: true
+            - bash: git config --global url."https://pat:$SYSTEM_ACCESSTOKEN@kroger-rd.visualstudio.com".insteadOf https://kroger-rd.visualstudio.com
+              displayName: Inject PAT token 
+              workingDirectory: ${{ parameters.workingDirectory }}  
+              env:
+                SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+            - task: AzureCLI@1
+              displayName: 'Download Terraform plan'
+              inputs:
+                azureSubscription: ${{ parameters.azureSubscription }}
+                scriptLocation: 'inlinescript'
+                inlineScript: 'az storage blob download -f "$(Build.ArtifactStagingDirectory)/$(Build.BuildId)_${{ parameters.name }}.zip" -c tfplan -n ${{ parameters.backendKey }}-$(Build.BuildId) --account-name=${{ parameters.backendStorageAccount }}'
+            - task: ExtractFiles@1
+              displayName: 'Extract Terraform Working Directory'
+              inputs:
+                archiveFilePatterns: $(Build.ArtifactStagingDirectory)/$(Build.BuildId)_${{ parameters.name }}.zip
+                destinationFolder: $(Build.ArtifactStagingDirectory)/$(Build.BuildId)_${{ parameters.name }}
+            - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
+              displayName: 'Install Terraform'
+              inputs:
+                terraformVersion: ${{ parameters.terraformVersion }}
+            - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV1@0
+              displayName: 'Terraform apply'
+              name: tfApply
+              inputs:
+                workingDirectory: $(Build.ArtifactStagingDirectory)/$(Build.BuildId)_${{ parameters.name }}
+                provider: azurerm
+                command: apply
+                commandOptions: '-input=false -auto-approve "$(Build.ArtifactStagingDirectory)/$(Build.BuildId)_${{ parameters.name }}/tfplan"'
+                environmentServiceNameAzureRM: ${{ parameters.azureSubscription }}
+              env:
+                ${{ each var in parameters.vars }}: 
+                  TF_VAR_${{var.key}}: ${{var.value}}
+            - task: AzureCLI@1
+              displayName: 'Break Lease on Terraform State'
+              condition: canceled()
+              inputs:
+                azureSubscription: ${{ parameters.azureSubscription }}
+                scriptLocation: inlineScript
+                inlineScript: 'az storage blob lease break --blob-name ${{ parameters.backendKey }} --container-name ${{ parameters.backendContainer }} --account-name ${{ parameters.backendStorageAccount }} || true'
+            - bash: git config --global --unset url."https://pat:$SYSTEM_ACCESSTOKEN@kroger-rd.visualstudio.com".insteadOf https://kroger-rd.visualstudio.com
+              displayName: Remove PAT token for Git
+              condition: always()
+              env:
+                SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+
+
+      # - job: terraform_apply
+      #   displayName: terraform Plan
+      #   steps:
+        
+      #   - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV1@0
+      #     displayName: 'Terraform Init'
+      #     inputs:
+      #       workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+      #       backendServiceArm: 'Visual Studio Enterprise (acd2e298-d61f-4ed2-8b28-dc2f60d9f382)'
+      #       backendAzureRmResourceGroupName: 'Terraform-state'
+      #       backendAzureRmStorageAccountName: grizzletffiles
+      #       backendAzureRmContainerName: tfstate
+      #       backendAzureRmKey: terraform.tfstate
+
+      #   - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV1@0
+      #     displayName: 'Terraform Apply'
+      #     inputs:
+      #       command: apply
+      #       environmentServiceNameAzureRM: 'Visual Studio Enterprise (acd2e298-d61f-4ed2-8b28-dc2f60d9f382)'
