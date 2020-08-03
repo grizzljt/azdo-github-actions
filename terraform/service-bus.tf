@@ -1,5 +1,5 @@
 resource "azurerm_servicebus_namespace" "demo" {
-  name                = "${environment}-${var.app_name}-sbus-ns"
+  name                = "${var.environment}-${var.app_name}-sbus-ns"
   location            = var.region_primary
   resource_group_name = azurerm_resource_group.demo.name
   sku                 = "Standard"
@@ -10,7 +10,7 @@ resource "azurerm_servicebus_namespace" "demo" {
 }
 
 resource "azurerm_servicebus_queue" "demo" {
-  name                = "${environment}-${var.app_name}-sbus"
+  name                = "${var.environment}-${var.app_name}-sbus"
   resource_group_name = azurerm_resource_group.demo.name
   namespace_name      = azurerm_servicebus_namespace.demo.name
 
@@ -18,7 +18,7 @@ resource "azurerm_servicebus_queue" "demo" {
 }
 
 resource "azurerm_servicebus_queue_authorization_rule" "demo" {
-  name                = "${environment}-${var.app_name}-owner-sbus-rule"
+  name                = "${var.environment}-${var.app_name}-owner-sbus-rule"
   namespace_name      = azurerm_servicebus_namespace.demo.name
   queue_name          = azurerm_servicebus_queue.demo.name
   resource_group_name = azurerm_resource_group.demo.name

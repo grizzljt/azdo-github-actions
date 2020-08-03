@@ -1,5 +1,5 @@
 variable "tags" {
-  type        = "map"
+  type        = map
   default     = {}
   description = "(Optional) Additional tags to apply."
 }
@@ -39,7 +39,7 @@ variable "https_only" {
   description = "(Optional) Force HTTPS only"
 }
 variable "appsettings" {
-  type        = "map"
+  type        = map
   default     = {}
   description = "(Optional) App settings to initialize the app with "
 }
