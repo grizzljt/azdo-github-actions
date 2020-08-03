@@ -15,4 +15,5 @@ variable "region_primary" {
 
 variable "tags" {
   description = "The default tags to be applied to infrastructure"
+  default = {}
 }

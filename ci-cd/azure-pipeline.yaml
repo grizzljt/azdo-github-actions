@@ -1,0 +1,58 @@
+stages:
+  - stage: demo_plan
+    displayName: 'Demo Plan'
+    
+    pool:
+      name: Azure Pipelines
+      vmImage: ubuntu-18.04
+    
+    jobs:
+    
+    - job: terraform_plan
+      displayName: terraform Plan
+      steps:
+
+      - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV1@0
+        displayName: 'Terraform Init'
+        inputs:
+          workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+          backendServiceArm: 'Visual Studio Enterprise (acd2e298-d61f-4ed2-8b28-dc2f60d9f382)'
+          backendAzureRmResourceGroupName: 'Terraform-state'
+          backendAzureRmStorageAccountName: grizzletffiles
+          backendAzureRmContainerName: tfstate
+          backendAzureRmKey: terraform.tfstate
+
+      - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV1@0
+        displayName: 'Terraform plan'
+        inputs:
+          command: plan
+          environmentServiceNameAzureRM: 'Visual Studio Enterprise (acd2e298-d61f-4ed2-8b28-dc2f60d9f382)'
+
+  - stage: demo_apply
+    displayName: 'Demo Apply'
+  
+    pool:
+      name: Azure Pipelines
+      vmImage: ubuntu-18.04
+
+    jobs:
+  
+      - job: terraform_plan
+        displayName: terraform Plan
+        steps:
+        
+        - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV1@0
+          displayName: 'Terraform Init'
+          inputs:
+            workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+            backendServiceArm: 'Visual Studio Enterprise (acd2e298-d61f-4ed2-8b28-dc2f60d9f382)'
+            backendAzureRmResourceGroupName: 'Terraform-state'
+            backendAzureRmStorageAccountName: grizzletffiles
+            backendAzureRmContainerName: tfstate
+            backendAzureRmKey: terraform.tfstate
+
+        - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV1@0
+          displayName: 'Terraform Apply'
+          inputs:
+            command: apply
+            environmentServiceNameAzureRM: 'Visual Studio Enterprise (acd2e298-d61f-4ed2-8b28-dc2f60d9f382)'

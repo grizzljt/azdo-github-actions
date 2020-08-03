@@ -1,10 +1,10 @@
 resource "azurerm_storage_account" "demo" {
-  name                      = "${var.environment}-${var.app_name}-stg-acc"
+  name                      = "${var.environment}${var.app_name}stgacc"
   resource_group_name       = azurerm_resource_group.demo.name
   location                  = azurerm_resource_group.demo.location
   account_tier              = "Standard"
   account_replication_type  = "LRS"
-  tags                      = var.tags
+  tags                      = {}
   enable_https_traffic_only = "true"
 }
 
