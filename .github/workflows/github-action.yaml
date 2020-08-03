@@ -16,6 +16,7 @@ jobs:
       run:
         shell: bash
         working-directory: ./terraform
+        tf_actions_working_dir: ./terraform
         
     steps:
     # - name: Checkout
