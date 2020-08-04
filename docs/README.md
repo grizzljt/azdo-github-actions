@@ -5,4 +5,5 @@ Test migration from azdo pipelines to GitHub actions
 - Service Account to run pipelines
 - Storage account for Terraform State and Plan files
 - AzDO Project
+- GitHub secrets
  

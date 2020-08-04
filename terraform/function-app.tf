@@ -24,7 +24,7 @@ module "function_app_listener" {
   resource_group_name               = azurerm_resource_group.demo.name
   location                          = azurerm_resource_group.demo.location
   tags                              = {}
-  storage_account_connection_string = azurerm_storage_account.demo.primary_access_key
+  storage_account_connection_string = azurerm_storage_account.demo.primary_connection_string
   function_app_name                 = "${var.environment}-${var.app_name}-Event-Hub-Listener"
 
   appsettings = {
