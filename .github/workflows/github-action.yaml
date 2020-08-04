@@ -48,14 +48,14 @@ jobs:
         tf_actions_version: 0.12.28
         tf_actions_subcommand: 'init'
         tf_actions_working_dir: './terraform'
-        args: '-var="client_secret=${{ secrets.clientSecret }} ARM_TENANT_ID=55a46e16-637a-4cfb-acaa-d89183887b16 ARM_SUBSCRIPTION_ID=acd2e298-d61f-4ed2-8b28-dc2f60d9f382 ARM_CLIENT_ID=02b6c340-bab3-472a-bb22-8d7241444b80 ARM_CLIENT_SECRET=UTbbV.uyRXcmMk~VdymQDUCba3~74K6_52 ARM_ACCESS_KEY=f/SQibk3XRJ/KSzc8k3sFcCDaNXNGzkRsKpAsMSEw4c/iLpjQgTkCFWMsfh9o4Ih2hWIrETk4ydqTdJmur9FZw=="'
+        args: '-v="client_secret=${{ secrets.clientSecret }} ARM_TENANT_ID=55a46e16-637a-4cfb-acaa-d89183887b16 ARM_SUBSCRIPTION_ID=acd2e298-d61f-4ed2-8b28-dc2f60d9f382 ARM_CLIENT_ID=02b6c340-bab3-472a-bb22-8d7241444b80 ARM_CLIENT_SECRET=UTbbV.uyRXcmMk~VdymQDUCba3~74K6_52 ARM_ACCESS_KEY=f/SQibk3XRJ/KSzc8k3sFcCDaNXNGzkRsKpAsMSEw4c/iLpjQgTkCFWMsfh9o4Ih2hWIrETk4ydqTdJmur9FZw=="'
 
     - name: "Terraform Plan"
       uses: hashicorp/terraform-github-actions@master
       with:
         tf_actions_version: 0.12.28
         tf_actions_subcommand: "plan"
-        args: '-var="client_secret=${{ secrets.clientSecret }} ARM_TENANT_ID=55a46e16-637a-4cfb-acaa-d89183887b16 ARM_SUBSCRIPTION_ID=acd2e298-d61f-4ed2-8b28-dc2f60d9f382 ARM_CLIENT_ID=02b6c340-bab3-472a-bb22-8d7241444b80 ARM_CLIENT_SECRET=UTbbV.uyRXcmMk~VdymQDUCba3~74K6_52 ARM_ACCESS_KEY=f/SQibk3XRJ/KSzc8k3sFcCDaNXNGzkRsKpAsMSEw4c/iLpjQgTkCFWMsfh9o4Ih2hWIrETk4ydqTdJmur9FZw=="'
+        args: '-v="client_secret=${{ secrets.clientSecret }} ARM_TENANT_ID=55a46e16-637a-4cfb-acaa-d89183887b16 ARM_SUBSCRIPTION_ID=acd2e298-d61f-4ed2-8b28-dc2f60d9f382 ARM_CLIENT_ID=02b6c340-bab3-472a-bb22-8d7241444b80 ARM_CLIENT_SECRET=UTbbV.uyRXcmMk~VdymQDUCba3~74K6_52 ARM_ACCESS_KEY=f/SQibk3XRJ/KSzc8k3sFcCDaNXNGzkRsKpAsMSEw4c/iLpjQgTkCFWMsfh9o4Ih2hWIrETk4ydqTdJmur9FZw=="'
     
     # - name: "Terraform Apply"
     #   uses: hashicorp/terraform-github-actions@master
