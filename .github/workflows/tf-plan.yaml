@@ -15,7 +15,7 @@ jobs:
       run:
         shell: bash
         working-directory: ./terraform
-        
+
     steps:
       # Checkout the code
       # Marketplace: https://github.com/marketplace/actions/checkout
@@ -42,7 +42,7 @@ jobs:
       # Note: Color is disabled to prevent messy characters from appearing in the pull request comment
       - name: "Run - Terraform Plan"
         id: plan
-        run: terraform plan -input=false -no-color
+        run: terraform plan -input=false -var="client_secret=${{ secrets.clientSecret }} -no-color
 
       # Submit a comment with the plan output to the pull request
       - name: "Run - Terraform Comment"
