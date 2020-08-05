@@ -35,4 +35,4 @@ jobs:
 
       # Auto-approve prevents the requirement of human interaction
       - name: "Run - Terraform Apply"
-        run: terraform apply -input=false -var="client_secret=${{ secrets.clientSecret }} -auto-approve
+        run: terraform apply -input=false -var="client_secret=${{ secrets.clientSecret }}" -auto-approve
