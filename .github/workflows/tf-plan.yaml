@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
-    # set the working direction to /terraform
+    # set the working direction to /terraform 
     defaults:
       run:
         shell: bash
