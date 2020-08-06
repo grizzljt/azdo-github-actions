@@ -14,11 +14,14 @@ In this scenario, continuous integration of an Azure environment is desired. Con
 
 ## Details
 
-This repository contains two GitHub Workflow files:
+This repository contains three GitHub Workflow files:
 
-* [Terraform Plan](/.github/workflows/tf-plan.yml) - Triggered by any Pull Request.
+* [Terraform Plan](/.github/workflows/tf-plan.yaml) - Triggered by any Pull Request.
 
-* [Terraform Apply](/.github/workflows/tf-apply.yml) - Triggered by a Push into the `master` branch.
+* [Terraform Apply](/.github/workflows/tf-apply.yaml) - Triggered by a Push into the `master` branch.
+
+*[Docker Build and Push to Git Packages](/.github/workflows/docker.yaml) - Triggered by a Pull Request or Push into the `master` branch.
+
 
 ## Terraform Plan
 
