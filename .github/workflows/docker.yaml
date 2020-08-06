@@ -15,8 +15,8 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build the Docker image and push to GitHub Packages
-      run: 
+      run: |
         VERSION=$(date +%s)
-        docker build . --file ./services/sbus-queue-reader/Dockerfile --tag docker.pkg.github.com/grizzljt/azdo-github-actions/sbus-reader:1
+        docker build . --file ./services/sbus-queue-reader/Dockerfile --tag docker.pkg.github.com/grizzljt/azdo-github-actions/sbus-reader:${VERSION}
         docker login docker.pkg.github.com --username grizzljt --password ${{ secrets.GITHUB_TOKEN }}
-        docker push docker.pkg.github.com/grizzljt/azdo-github-actions/sbus-reader:1
+        docker push docker.pkg.github.com/grizzljt/azdo-github-actions/sbus-reader:${VERSION}
