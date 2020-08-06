@@ -31,3 +31,6 @@ override.tf.json
 # Ignore local env files
 .envrc
 creds.conf
+
+# ignore VSCode
+/.vscode/*
