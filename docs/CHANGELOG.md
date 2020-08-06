@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 ### Fixed
 
+## [1.0.0] - 2020-08-06
+### Added
+- Added ACR
+
 ## [1.0.0] - 2020-08-04
 ### Added
 - Terraform to create Resource Group, Service Bus Queue, function app, ACR
