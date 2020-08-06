@@ -38,6 +38,10 @@ jobs:
       - name: "Run - Terraform Init"
         run: terraform init -input=false -backend-config="access_key=${{ secrets.ACCESSKEY }}"
 
+      # Checks that all Terraform configuration files adhere to a canonical format
+      - name: Terraform Format
+        run: terraform fmt
+
       # The id value is used for reference in the comment step via "steps.plan.outputs.stdout"
       # Note: Color is disabled to prevent messy characters from appearing in the pull request comment
       - name: "Run - Terraform Plan"
